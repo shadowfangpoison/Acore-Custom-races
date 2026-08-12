@@ -472,7 +472,7 @@ void ScriptedAI::DoResetThreat(Unit* unit)
 
 void ScriptedAI::DoResetThreatList()
 {
-    if (!me->CanHaveThreatList() || me->GetThreatMgr().isThreatListEmpty())
+    if (!me->CanHaveThreatList() || me->GetThreatMgr().IsThreatListEmpty(true))
     {
         LOG_ERROR("entities.unit.ai", "DoResetThreatList called for creature that either cannot have threat list or has empty threat list (me entry = {})", me->GetEntry());
         return;
@@ -624,7 +624,7 @@ BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
     // Clear it in the script if you need it to update while the creature is casting.
     scheduler.SetValidator([this]
     {
-        return !me->HasUnitState(UNIT_STATE_CASTING);
+        return !me->IsActionPreventedByCasting();
     });
 }
 
@@ -714,11 +714,12 @@ void BossAI::TeleportCheaters()
     float x, y, z;
     me->GetPosition(x, y, z);
 
-    ThreatContainer::StorageType threatList = me->GetThreatMgr().GetThreatList();
-    for (ThreatContainer::StorageType::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-        if (Unit* target = (*itr)->getTarget())
-            if (target->IsPlayer() && !IsInBoundary(target))
-                target->NearTeleportTo(x, y, z, 0);
+    for (auto const& pair : me->GetCombatManager().GetPvECombatRefs())
+    {
+        Unit* target = pair.second->GetOther(me);
+        if (target->IsControlledByPlayer() && !IsInBoundary(target))
+            target->NearTeleportTo(x, y, z, 0);
+    }
 }
 
 void BossAI::JustSummoned(Creature* summon)
@@ -748,7 +749,7 @@ void BossAI::UpdateAI(uint32 diff)
     events.Update(diff);
     scheduler.Update(diff);
 
-    if (me->HasUnitState(UNIT_STATE_CASTING))
+    if (me->IsActionPreventedByCasting())
     {
         return;
     }
@@ -756,7 +757,7 @@ void BossAI::UpdateAI(uint32 diff)
     while (uint32 const eventId = events.ExecuteEvent())
     {
         ExecuteEvent(eventId);
-        if (me->HasUnitState(UNIT_STATE_CASTING))
+        if (me->IsActionPreventedByCasting())
         {
             return;
         }
@@ -793,7 +794,7 @@ void BossAI::_CheckHealthAfterCast()
         // This must be delayed because creature might still have unit state casting at this point, which might break scripts.
         scheduler.Schedule(1s, [this](TaskContext context)
         {
-            if (me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->IsActionPreventedByCasting())
                 context.Repeat();
             else
                 ProcessHealthCheck();
@@ -809,7 +810,7 @@ void BossAI::DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damage
     {
         if (me->HealthBelowPctDamaged(_nextHealthCheck._healthPct, damage))
         {
-            if (!_nextHealthCheck._allowedWhileCasting && me->HasUnitState(UNIT_STATE_CASTING))
+            if (!_nextHealthCheck._allowedWhileCasting && me->IsActionPreventedByCasting())
             {
                 _nextHealthCheck.UpdateStatus(HEALTH_CHECK_PENDING);
                 return;
@@ -919,7 +920,7 @@ void WorldBossAI::UpdateAI(uint32 diff)
 
     events.Update(diff);
 
-    if (me->HasUnitState(UNIT_STATE_CASTING))
+    if (me->IsActionPreventedByCasting())
         return;
 
     while (uint32 eventId = events.ExecuteEvent())
