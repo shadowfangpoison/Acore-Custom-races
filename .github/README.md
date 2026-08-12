@@ -1,5 +1,40 @@
-This is a Custom Release-Azerotchcore-wotlk3.3.5 with DB 15
+This is a Custom Release-Azerotchcore-wotlk3.3.5 with DB 16
+
 # ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) AzerothCore
+## Developer Background
+
+This project is developed by a creator with experience in:
+
+- Vanilla 1.12.1 / 1.12.2 (MaNGOS Zero)
+- Turtle-WoW custom MaNGOS systems
+- MaNGOS-WotLK (non-specialist operational knowledge)
+- AzerothCore WotLK (current active development)
+- Diablo LoD 1.13c (4–5 high-quality modules, filtered by design and stability)
+
+Focus is placed on producing a small number of high-quality modules rather than
+large quantities. All work follows strict internal filters for consistency,
+balance, compatibility and technical clarity.
+
+Teaching capability includes:
+- Diablo LoD 1.13c modding
+- Turtle-WoW / MaNGOS Vanilla development (DBC, world, races, items, mechanics)
+
+Not involved in:
+- TBC development
+- WoW 1.14.x Classic Era development
+
+
+## Script Aliases
+
+The following folder contains script aliases.  
+Do not implement scripts here.
+
+All bash scripts in this directory must be compatible with the following
+environments:
+
+- **linux**: bash 4.x
+- **windows**: Git for Windows 2.9.3
+- **osx**: optional support; included for completeness
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![CodeFactor](https://www.codefactor.io/repository/github/azerothcore/azerothcore-wotlk/badge)](https://www.codefactor.io/repository/github/azerothcore/azerothcore-wotlk)
